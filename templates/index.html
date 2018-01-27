@@ -41,7 +41,7 @@
                     <form class="form-inline" role="form" method="POST" data-toggle="validator">
                         <div class="form-group has-feedback">
                             <div class='input-group date' id='datetimepicker6'>
-                                <input type='text' class="form-control" placeholder="Formatted start date" name="from" required pattern="^\d{2}\/\d{2}\/\d{4} \d{1,2}:\d{2} (AM|PM)$" maxlength="19" data-error="Please stick to the date format!"/>
+                                <input type='text' class="form-control" placeholder="Formatted start date" name="from" required pattern="^\d{2}\/\d{2}\/\d{4} \d{1,2}:\d{2} (AM|PM)$" maxlength="19" data-error="Please stick to the date format!" />
                                 <span class="input-group-addon">
                                     <span class="glyphicon glyphicon-calendar"></span>
                                 </span>
@@ -49,7 +49,7 @@
                         </div>
                         <div class="form-group has-feedback">
                             <div class='input-group date' id='datetimepicker7'>
-                                <input type='text' class="form-control" placeholder="Formatted end date" name="to" required pattern="^\d{2}\/\d{2}\/\d{4} \d{1,2}:\d{2} (AM|PM)$" maxlength="19" data-error="Please stick to the date format!"/>
+                                <input type='text' class="form-control" placeholder="Formatted end date" name="to" required pattern="^\d{2}\/\d{2}\/\d{4} \d{1,2}:\d{2} (AM|PM)$" maxlength="19" data-error="Please stick to the date format!" />
                                 <span class="input-group-addon">
                                 <span class="glyphicon glyphicon-calendar"></span>
                                 </span>
@@ -57,7 +57,7 @@
                         </div>
                         <div class="form-group has-feedback">
                             <div class='input-group' id='coin'>
-                                <input type='text' class="form-control" placeholder="Coin uppercased" name="coin" required pattern="^[A-Z]+$" data-error="Upper register letters only!"/>
+                                <input type='text' class="form-control" placeholder="Coin uppercased" name="coin" required pattern="^[A-Z]+$" data-error="Upper register letters only!" />
                                 <span class="input-group-addon">
                                 <span class="glyphicon glyphicon-bitcoin"></span>
                                 </span>
@@ -94,6 +94,71 @@
                     <a class="btn btn-success btn-block btn-default" role="button" href='/uploads/{{ download }}.csv'>Download CSV!</a>
                 </div>
             </div>
+            <div class="row">
+                <div class="col-md-12">
+                    <hr />
+                </div>
+            </div>
+            <table class="table table-hover table-bordered">
+                <thead>
+                    <tr>
+                        <th>
+                            Id
+                        </th>
+                        <th>
+                            Pair
+                        </th>
+                        <th>
+                            Quantity
+                        </th>
+                        <th>
+                            Price
+                        </th>
+                        <th>
+                            Total
+                        </th>
+                        <th>
+                            FillType
+                        </th>
+                        <th>
+                            OrderType
+                        </th>
+                        <th>
+                            TimeStamp
+                        </th>
+                    </tr>
+                </thead>
+                {% for d in data %}
+                <tbody>
+                    <tr>
+                        <td>
+                            {{ d.Id }}
+                        </td>
+                        <td>
+                            {{ d.Pair }}
+                        </td>
+                        <td>
+                            {{ d.Quantity }}
+                        </td>
+                        <td>
+                            {{ d.Price }}
+                        </td>
+                        <td>
+                            {{ d.Total }}
+                        </td>
+                        <td>
+                            {{ d.FillType }}
+                        </td>
+                        <td>
+                            {{ d.OrderType }}
+                        </td>
+                        <td>
+                            {{ d.TimeStamp }}
+                        </td>
+                    </tr>
+                </tbody>
+                {% endfor %}
+            </table>
             {% else %} {% if not get %}
             <div class="row">
                 <div class="col-md-12">

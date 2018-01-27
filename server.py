@@ -17,7 +17,6 @@ app.config['UPLOAD_FOLDER'] = 'archive'
 hashed_pass = ''
 hashed_name = ''
 
-
 class LoginForm(FlaskForm):
     """Basic login form."""
 
@@ -35,7 +34,7 @@ def login():
     error = False
     if form.validate_on_submit():
         if check_password_hash(hashed_name, form.username.data) and\
-                check_password_hash(hashed_pass, form.password.data):
+            check_password_hash(hashed_pass, form.password.data):
             session['username'] = form.username.data
             return redirect(url_for('index'))
         else:
@@ -62,16 +61,18 @@ def index():
     """Show the main page."""
     if 'username' in session:
         if request.method == 'GET':
-            return render_template('index.html',
-                                   name=session['username'],
-                                   get=True)
+            return render_template('index.html', name=session['username'], get=True)
         elif request.method == 'POST':
             result = fetch(request.form['from'],
                            request.form['to'],
                            request.form['coin'])
-            return render_template('index.html',
-                                   name=session['username'],
-                                   download=result)
+            if result:
+                return render_template('index.html',
+                                       name=session['username'],
+                                       download=result[0],
+                                       data=result[1][:100])
+            else:
+                return render_template('index.html', name=session['username'])
     return redirect(url_for('login'))
 
 
