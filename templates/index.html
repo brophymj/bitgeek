@@ -1,0 +1,117 @@
+<html>
+
+    <head>
+        <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.2.1/jquery.min.js"></script>
+        <script src="https://cdnjs.cloudflare.com/ajax/libs/moment.js/2.20.1/moment.min.js"></script>
+        <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/js/bootstrap.min.js"></script>
+        <script src="https://cdnjs.cloudflare.com/ajax/libs/bootstrap-datetimepicker/4.17.47/js/bootstrap-datetimepicker.min.js"></script>
+        <script src="https://cdnjs.cloudflare.com/ajax/libs/1000hz-bootstrap-validator/0.11.9/validator.js"></script>
+        <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css">
+        <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap-datetimepicker/4.17.47/css/bootstrap-datetimepicker.min.css" />
+        <link rel="shortcut icon" href="{{ url_for('static', filename='favicon.ico') }}">
+    </head>
+
+    <body>
+        <div class="container-fluid">
+            <div class="row">
+                <div class="col-md-12">
+                    <nav class="navbar navbar-default navbar-inverse" role="navigation">
+                        <div class="navbar-header active">
+                            <a class="navbar-brand active">Bittrex Machine</a>
+                        </div>
+                        <div class="collapse navbar-collapse" id="bs-example-navbar-collapse-1">
+                            <ul class="nav navbar-nav navbar-right">
+                                <li class="dropdown">
+                                    <a href="#" class="dropdown-toggle" data-toggle="dropdown">Welcome back, {{ name }}!<strong class="caret"></strong></a>
+                                    <ul class="dropdown-menu">
+                                        <li>
+                                            <a href="/logout">Log out</a>
+                                        </li>
+                                    </ul>
+                                </li>
+                            </ul>
+                        </div>
+                    </nav>
+                </div>
+            </div>
+            <div class="row">
+                <div class="col-md-3">
+                </div>
+                <div class="col-md-6">
+                    <form class="form-inline" role="form" method="POST" data-toggle="validator">
+                        <div class="form-group has-feedback">
+                            <div class='input-group date' id='datetimepicker6'>
+                                <input type='text' class="form-control" placeholder="Formatted start date" name="from" required pattern="^\d{2}\/\d{2}\/\d{4} \d{1,2}:\d{2} (AM|PM)$" maxlength="19" data-error="Please stick to the date format!"/>
+                                <span class="input-group-addon">
+                                    <span class="glyphicon glyphicon-calendar"></span>
+                                </span>
+                            </div>
+                        </div>
+                        <div class="form-group has-feedback">
+                            <div class='input-group date' id='datetimepicker7'>
+                                <input type='text' class="form-control" placeholder="Formatted end date" name="to" required pattern="^\d{2}\/\d{2}\/\d{4} \d{1,2}:\d{2} (AM|PM)$" maxlength="19" data-error="Please stick to the date format!"/>
+                                <span class="input-group-addon">
+                                <span class="glyphicon glyphicon-calendar"></span>
+                                </span>
+                            </div>
+                        </div>
+                        <div class="form-group has-feedback">
+                            <div class='input-group' id='coin'>
+                                <input type='text' class="form-control" placeholder="Coin uppercased" name="coin" required pattern="^[A-Z]+$" data-error="Upper register letters only!"/>
+                                <span class="input-group-addon">
+                                <span class="glyphicon glyphicon-bitcoin"></span>
+                                </span>
+                            </div>
+                        </div>
+                        <button type="submit" class="btn btn-primary btn-default">Submit</button>
+                    </form>
+                    <script type="text/javascript">
+                        $(function() {
+                            $('#datetimepicker6').datetimepicker();
+                            $('#datetimepicker7').datetimepicker({
+                                useCurrent: false
+                            });
+                            $("#datetimepicker6").on("dp.change", function(e) {
+                                $('#datetimepicker7').data("DateTimePicker").minDate(e.date);
+                            });
+                            $("#datetimepicker7").on("dp.change", function(e) {
+                                $('#datetimepicker6').data("DateTimePicker").maxDate(e.date);
+                            });
+                        });
+                    </script>
+                </div>
+                <div class="col-md-3">
+                </div>
+            </div>
+            {% if download %}
+            <div class="row">
+                <div class="col-md-12">
+                    <hr />
+                </div>
+            </div>
+            <div class="row">
+                <div class="col-md-12">
+                    <a class="btn btn-success btn-block btn-default" role="button" href='/uploads/{{ download }}.csv'>Download CSV!</a>
+                </div>
+            </div>
+            {% else %} {% if not get %}
+            <div class="row">
+                <div class="col-md-12">
+                    <hr />
+                </div>
+            </div>
+            <div class="row">
+                <div class="col-md-3"></div>
+                <div class="col-md-6">
+                    <div class="alert alert-warning alert-dismissable">
+                        <button type="button" class="close" data-dismiss="alert" aria-hidden="true">×</button>
+                        <h4>Warning!</h4> No results found!
+                    </div>
+                </div>
+                <div class="col-md-3"></div>
+            </div>
+            {% endif %} {% endif %}
+        </div>
+    </body>
+
+</html>
