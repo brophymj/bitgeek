@@ -73,7 +73,7 @@ def fetch(fromdate, todate, coin):
     ).sort([('TimeStamp', -1)]))
     if not result:
         logging.critical('No results found!')
-        return (False)
+        return False
     logging.info('{} results found, writing to CSV...'.format(len(result)))
     filepath = '-'.join(path)
     with open('archive/{}.csv'.format(filepath), 'w') as dump:
