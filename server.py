@@ -120,19 +120,19 @@ def graph():
                                    name=session['username'],
                                    data=result,
                                    prices=[float(i['price'])
-                                           for i in result][::-1],
+                                           for i in result][::-1][::int(request.form['interval'])],
                                    fastes=[float(i['ema_fast'])
-                                           for i in result][::-1],
+                                           for i in result][::-1][::int(request.form['interval'])],
                                    slowes=[float(i['ema_slow'])
-                                           for i in result][::-1],
+                                           for i in result][::-1][::int(request.form['interval'])],
                                    minutes='*'.join([i['datetime']
-                                                     for i in result][::-1]),
+                                                     for i in result][::-1][::int(request.form['interval'])]),
                                    macds=[float(i['macd'])
-                                           for i in result][::-1],
+                                           for i in result][::-1][::int(request.form['interval'])],
                                    macd_hists=[float(i['macd_hist'])
-                                               for i in result][::-1],
+                                               for i in result][::-1][::int(request.form['interval'])],
                                    signallines=[float(i['signal_line'])
-                                                for i in result][::-1])
+                                                for i in result][::-1][::int(request.form['interval'])])
         else:
             flash('No results found!', category='warning')
     return render_template('graph.html', name=session['username'])
