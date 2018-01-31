@@ -119,6 +119,9 @@ def graph():
             return render_template('graph.html',
                                    name=session['username'],
                                    data=result,
+                                   fromvalue=request.form['from'],
+                                   tovalue=request.form['to'],
+                                   coinvalue=request.form['coin'],
                                    prices=[float(i['price'])
                                            for i in result][::-1][::int(request.form['interval'])],
                                    fastes=[float(i['ema_fast'])

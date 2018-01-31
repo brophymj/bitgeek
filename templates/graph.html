@@ -52,7 +52,7 @@
         <form class="form" role="form" method="POST" data-toggle="validator">
             <div class="form-group has-feedback">
                 <div class='input-group date' id='datetimepicker6'>
-                    <input type='text' class="form-control" placeholder="Formatted start date" name="from" required pattern="^\d{2}\/\d{2}\/\d{4} \d{1,2}:\d{2} (AM|PM)$" maxlength="19" data-error="Please stick to the date format!" />
+                    <input type='text' class="form-control" placeholder="Formatted start date" name="from" required pattern="^\d{2}\/\d{2}\/\d{4} \d{1,2}:\d{2} (AM|PM)$" maxlength="19" data-error="Please stick to the date format!" value='{{ fromvalue }}'/>
                     <span class="input-group-addon">
                                     <span class="glyphicon glyphicon-calendar"></span>
                     </span>
@@ -60,7 +60,7 @@
             </div>
             <div class="form-group has-feedback">
                 <div class='input-group date' id='datetimepicker7'>
-                    <input type='text' class="form-control" placeholder="Formatted end date" name="to" required pattern="^\d{2}\/\d{2}\/\d{4} \d{1,2}:\d{2} (AM|PM)$" maxlength="19" data-error="Please stick to the date format!" />
+                    <input type='text' class="form-control" placeholder="Formatted end date" name="to" required pattern="^\d{2}\/\d{2}\/\d{4} \d{1,2}:\d{2} (AM|PM)$" maxlength="19" data-error="Please stick to the date format!" value='{{ tovalue }}'/>
                     <span class="input-group-addon">
                                 <span class="glyphicon glyphicon-calendar"></span>
                     </span>
@@ -68,7 +68,7 @@
             </div>
             <div class="form-group has-feedback">
                 <div class='input-group' id='coin'>
-                    <input type='text' class="form-control" placeholder="Coin uppercased" name="coin" required pattern="^[A-Z]+$" data-error="Upper register letters only!" />
+                    <input type='text' class="form-control" placeholder="Coin uppercased" name="coin" required pattern="^[A-Z]+$" data-error="Upper register letters only!" value='{{ coinvalue }}' />
                     <span class="input-group-addon">
                                 <span class="glyphicon glyphicon-bitcoin"></span>
                     </span>
