@@ -25,17 +25,14 @@ def get_report():
     return report or False
 
 
-def summarize(fromdate, todate, coin, fast, slow, signal):
+def summarize(interval, todate, coin, fast, slow, signal):
     """Get the graph generated."""
+    limits = interval * 40
     coin = 'BTC-' + coin
     pipeline =\
         [{"$match":
           {'TimeStamp':
-           {"$gt":
-            datetime.strptime(fromdate,
-                              '%m/%d/%Y %I:%M %p'
-                              ).strftime('%Y-%m-%dT%H:%M'),
-            "$lt":
+           {"$lt":
             (datetime.strptime(todate,
                                '%m/%d/%Y %I:%M %p'
                                ) + timedelta(minutes=1)
@@ -88,7 +85,8 @@ def summarize(fromdate, todate, coin, fast, slow, signal):
            }
           },
          {"$sort": SON([("_id", -1)])
-          }
+          },
+         {"$limit": limits}
          ]
     summarized = list(collection.aggregate(pipeline))
     if summarized:

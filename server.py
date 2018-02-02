@@ -107,7 +107,7 @@ def report():
 def graph():
     """Show the graphs page."""
     if request.method == 'POST':
-        result = summarize(request.form['from'],
+        result = summarize(request.form['interval'],
                            request.form['to'],
                            request.form['coin'],
                            request.form['fast'],
@@ -123,19 +123,44 @@ def graph():
                                    tovalue=request.form['to'],
                                    coinvalue=request.form['coin'],
                                    prices=[float(i['price'])
-                                           for i in result][::-1][::int(request.form['interval'])],
+                                           for i in
+                                           result
+                                           ][::-1
+                                             ][::int(request.form['interval'])
+                                               ],
                                    fastes=[float(i['ema_fast'])
-                                           for i in result][::-1][::int(request.form['interval'])],
+                                           for i in result
+                                           ][::-1
+                                             ][::int(request.form['interval'])
+                                               ],
                                    slowes=[float(i['ema_slow'])
-                                           for i in result][::-1][::int(request.form['interval'])],
+                                           for i in result
+                                           ][::-1
+                                             ][::int(request.form['interval'])
+                                               ],
                                    minutes='*'.join([i['datetime']
-                                                     for i in result][::-1][::int(request.form['interval'])]),
+                                                     for i in result
+                                                     ][::-1
+                                                       ][::int(
+                                                           request.form[
+                                                               'interval'])]
+                                                    ),
                                    macds=[float(i['macd'])
-                                           for i in result][::-1][::int(request.form['interval'])],
+                                           for i in result
+                                          ][::-1
+                                            ][::int(request.form['interval'])
+                                              ],
                                    macd_hists=[float(i['macd_hist'])
-                                               for i in result][::-1][::int(request.form['interval'])],
+                                               for i in result
+                                               ][::-1
+                                                 ][::int(request.form[
+                                                     'interval'])
+                                                   ],
                                    signallines=[float(i['signal_line'])
-                                                for i in result][::-1][::int(request.form['interval'])])
+                                                for i in result
+                                                ][::-1
+                                                  ][::int(request.form[
+                                                      'interval'])])
         else:
             flash('No results found!', category='warning')
     return render_template('graph.html', name=session['username'])
