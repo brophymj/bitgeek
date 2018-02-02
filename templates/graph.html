@@ -51,19 +51,12 @@
     <div class="col-md-4">
         <form class="form" role="form" method="POST" data-toggle="validator">
             <div class="form-group has-feedback">
-                <div class='input-group date' id='datetimepicker6'>
-                    <input type='text' class="form-control" placeholder="Formatted start date" name="from" required pattern="^\d{2}\/\d{2}\/\d{4} \d{1,2}:\d{2} (AM|PM)$" maxlength="19" data-error="Please stick to the date format!" value='{{ fromvalue }}'/>
+                <div class='input-group date' id='datetimepicker_to'>
+                    <input type='text' class="form-control" name='to'placeholder="Formatted start date" required pattern="^\d{2}\/\d{2}\/\d{4} \d{1,2}:\d{2} (AM|PM)$" maxlength="19" data-error="Please stick to the date format!"/>
                     <span class="input-group-addon">
-                                    <span class="glyphicon glyphicon-calendar"></span>
+                        <span class="glyphicon glyphicon-calendar">
                     </span>
-                </div>
-            </div>
-            <div class="form-group has-feedback">
-                <div class='input-group date' id='datetimepicker7'>
-                    <input type='text' class="form-control" placeholder="Formatted end date" name="to" required pattern="^\d{2}\/\d{2}\/\d{4} \d{1,2}:\d{2} (AM|PM)$" maxlength="19" data-error="Please stick to the date format!" value='{{ tovalue }}'/>
-                    <span class="input-group-addon">
-                                <span class="glyphicon glyphicon-calendar"></span>
-                    </span>
+                </span>
                 </div>
             </div>
             <div class="form-group has-feedback">
@@ -100,7 +93,13 @@
             </div>
             <div class="form-group has-feedback">
                 <div class='input-group' id='interval'>
-                    <input type='text' class="form-control" placeholder="Interval param" name="interval" required pattern="^\d+$" data-error="Numbers only!" value="1" />
+                    <select class="form-control" id="selector" name='interval'>
+                        <option value='1'>1 minute</option>
+                        <option value='5'>5 minutes</option>
+                        <option value='10'>10 minutes</option>
+                        <option value='30'>30 minutes</option>
+                        <option value='60'>60 minutes</option>
+                    </select>
                     <span class="input-group-addon">
                                 Interval
                     </span>
@@ -109,18 +108,11 @@
             <button type="submit" class="btn btn-primary btn-default btn-block">Submit</button>
         </form>
         <script type="text/javascript">
-            $(function() {
-                $('#datetimepicker6').datetimepicker();
-                $('#datetimepicker7').datetimepicker({
-                    useCurrent: false
-                });
-                $("#datetimepicker6").on("dp.change", function(e) {
-                    $('#datetimepicker7').data("DateTimePicker").minDate(e.date);
-                });
-                $("#datetimepicker7").on("dp.change", function(e) {
-                    $('#datetimepicker6').data("DateTimePicker").maxDate(e.date);
-                });
+        $(function () {
+            $('#datetimepicker_to').datetimepicker({
+                defaultDate: new Date()
             });
+        });
         </script>
     </div>
     <div class="col-md-4">
