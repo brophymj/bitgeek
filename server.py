@@ -107,60 +107,57 @@ def report():
 def graph():
     """Show the graphs page."""
     if request.method == 'POST':
-        result = summarize(request.form['interval'],
+        result = summarize(request.form.get('interval'),
                            request.form['to'],
                            request.form['coin'],
                            request.form['fast'],
                            request.form['slow'],
                            request.form['signal'])
         if result:
+            interval = int(request.form.get('interval'))
             flash('Found {} results!'.format(
                 len(result)), category='success')
             return render_template('graph.html',
                                    name=session['username'],
                                    data=result,
-                                   fromvalue=request.form['from'],
                                    tovalue=request.form['to'],
                                    coinvalue=request.form['coin'],
                                    prices=[float(i['price'])
                                            for i in
                                            result
                                            ][::-1
-                                             ][::int(request.form['interval'])
+                                             ][::interval
                                                ],
                                    fastes=[float(i['ema_fast'])
                                            for i in result
                                            ][::-1
-                                             ][::int(request.form['interval'])
+                                             ][::interval
                                                ],
                                    slowes=[float(i['ema_slow'])
                                            for i in result
                                            ][::-1
-                                             ][::int(request.form['interval'])
+                                             ][::interval
                                                ],
                                    minutes='*'.join([i['datetime']
                                                      for i in result
                                                      ][::-1
-                                                       ][::int(
-                                                           request.form[
-                                                               'interval'])]
+                                                       ][::interval]
                                                     ),
                                    macds=[float(i['macd'])
                                            for i in result
                                           ][::-1
-                                            ][::int(request.form['interval'])
+                                            ][::interval
                                               ],
                                    macd_hists=[float(i['macd_hist'])
                                                for i in result
                                                ][::-1
-                                                 ][::int(request.form[
-                                                     'interval'])
+                                                 ][::interval
                                                    ],
                                    signallines=[float(i['signal_line'])
                                                 for i in result
                                                 ][::-1
-                                                  ][::int(request.form[
-                                                      'interval'])])
+                                                  ][::interval],
+                                   bearbull=int(result[0]['macd_hist']))
         else:
             flash('No results found!', category='warning')
     return render_template('graph.html', name=session['username'])
