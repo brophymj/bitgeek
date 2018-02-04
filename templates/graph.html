@@ -51,9 +51,9 @@
     <div class="col-md-4">
         <form class="form" role="form" method="POST" data-toggle="validator">
             <div class="form-group has-feedback">
-                <label for='datetime'>UTC 'to' datetime (defaults to current):</label>
+                <label for='datetime'>UTC 'to' datetime (leave blank for current):</label>
                 <div class='input-group date' id='datetimepicker_to'>
-                    <input type='text' class="form-control" name='to'placeholder="Formatted end date" required pattern="^\d{2}\/\d{2}\/\d{4} \d{1,2}:\d{2} (AM|PM)$" maxlength="19" data-error="Please stick to the date format!" id='datetime'/>
+                    <input type='text' class="form-control" name='to'placeholder="Formatted end date" pattern="^\d{2}\/\d{2}\/\d{4} \d{1,2}:\d{2} (AM|PM)$" maxlength="19" data-error="Please stick to the date format!" id='datetime' value='{{ tovalue }}'/>
                     <span class="input-group-addon">
                         <span class="glyphicon glyphicon-calendar">
                     </span>
@@ -109,11 +109,8 @@
             <button type="submit" class="btn btn-primary btn-default btn-block">Submit</button>
         </form>
         <script type="text/javascript">
-        var now = new Date();
-        var now_utc = new Date(now.getUTCFullYear(), now.getUTCMonth(), now.getUTCDate(),  now.getUTCHours(), now.getUTCMinutes(), now.getUTCSeconds());
         $(function () {
             $('#datetimepicker_to').datetimepicker({
-                defaultDate: now_utc
             });
         });
         </script>

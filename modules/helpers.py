@@ -11,6 +11,21 @@ db = connection.bittrex
 collection = db.market
 
 
+def utcdate():
+    """Return properly formatted UTC date for Mongo."""
+    return datetime.utcnow().strftime('%m/%d/%Y %I:%M %p')
+
+
+def to_date(string):
+    """Convert string to date."""
+    return datetime.strptime(string, '%Y-%m-%dT%H:%M')
+
+
+def to_string(date):
+    """Convert date to string."""
+    return datetime.strftime(date, '%Y-%m-%dT%H:%M')
+
+
 def get_report():
     """Get MongoDB report."""
     report = {}
@@ -27,7 +42,7 @@ def get_report():
 
 def summarize(interval, todate, coin, fast, slow, signal):
     """Get the graph generated."""
-    limits = interval * 40
+    limits = interval * 66
     coin = 'BTC-' + coin
     pipeline =\
         [{"$match":
@@ -88,8 +103,37 @@ def summarize(interval, todate, coin, fast, slow, signal):
           },
          {"$limit": limits}
          ]
-    summarized = list(collection.aggregate(pipeline))
-    if summarized:
+    generator = list(collection.aggregate(pipeline))
+    if generator:
+        b = []
+        for i in generator[::-1]:
+            i['datetime'] = i['_id']['datehours'] + \
+                ':' + i['_id']['minutes']
+            if generator[::-1].index(i) == 0:
+                b.append(i.copy())
+                continue
+            position = b.index(b[-1])
+            difference = to_date(i['datetime']) -\
+                to_date(b[position]['datetime'])
+            if int(difference.total_seconds()) / 60 > 1:
+                price = b[position]['price']
+                base = to_date(i['datetime'])
+                date_list = [
+                    base - timedelta(minutes=x + 1)
+                    for x in range(0, int(difference.total_seconds() / 60
+                                          ) - 1)
+                ][::-1]
+                for d in date_list:
+                    b.append({'datetime': to_string(d),
+                              'price': price,
+                              'sum_quantity': 0})
+            b.append(i.copy())
+        generator = b[::-1][:interval * 67][::interval]
+        summarized = generator[:40]
+        ema_basic_slow = sum([Decimal(i['price']) for i in generator[41:]])\
+            / Decimal(len(generator[41:]))
+        ema_basic_fast = sum([Decimal(i['price']) for i in generator[41:53]])\
+            / Decimal(len(generator[41:53]))
         alphafast = Decimal(2.0 / (1.0 + float(fast)))
         alphaslow = Decimal(2.0 / (1.0 + float(slow)))
         alphasignal = Decimal(2.0 / (1.0 + float(signal)))
@@ -101,13 +145,15 @@ def summarize(interval, todate, coin, fast, slow, signal):
         first_generation = []
         for m in summarized:
             data = {}
-            data['datetime'] = m['_id']['datehours'] + \
-                ':' + m['_id']['minutes']
+            data['datetime'] = m['datetime']
             data['price'] = Decimal(m['price'])
             data['volume'] = Decimal(m['sum_quantity'])
             data['ema_fast'] = alphafast * Decimal(data['price'])
             data['ema_slow'] = alphaslow * Decimal(data['price'])
             first_generation.append(data.copy())
+
+        first_generation.append(
+            {'ema_fast': ema_basic_fast, 'ema_slow': ema_basic_slow})
 
         second_generation = []
         for g in first_generation[::-1]:
@@ -121,7 +167,7 @@ def summarize(interval, todate, coin, fast, slow, signal):
             second_generation.append(data.copy())
 
         third_generation = []
-        for t in second_generation:
+        for t in second_generation[1:]:
             data = t.copy()
             data['macd'] = data['ema_fast'] - data['ema_slow']
             data['signal_line'] = alphasignal * data['macd']

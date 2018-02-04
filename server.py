@@ -8,7 +8,7 @@ from flask import (Flask, current_app, flash, redirect, render_template,
 from flask_pymongo import PyMongo
 from modules.bittrex import fetch
 from modules.forms import LoginForm
-from modules.helpers import get_report, summarize
+from modules.helpers import get_report, summarize, utcdate
 from werkzeug.security import check_password_hash
 
 app = Flask(__name__)
@@ -107,14 +107,13 @@ def report():
 def graph():
     """Show the graphs page."""
     if request.method == 'POST':
-        result = summarize(request.form.get('interval'),
-                           request.form['to'],
+        result = summarize(int(request.form.get('interval')),
+                           request.form['to'] or utcdate(),
                            request.form['coin'],
                            request.form['fast'],
                            request.form['slow'],
                            request.form['signal'])
         if result:
-            interval = int(request.form.get('interval'))
             flash('Found {} results!'.format(
                 len(result)), category='success')
             return render_template('graph.html',
@@ -126,37 +125,32 @@ def graph():
                                            for i in
                                            result
                                            ][::-1
-                                             ][::interval
-                                               ],
+                                             ],
                                    fastes=[float(i['ema_fast'])
                                            for i in result
                                            ][::-1
-                                             ][::interval
-                                               ],
+                                             ],
                                    slowes=[float(i['ema_slow'])
                                            for i in result
                                            ][::-1
-                                             ][::interval
-                                               ],
+                                             ],
                                    minutes='*'.join([i['datetime']
                                                      for i in result
                                                      ][::-1
-                                                       ][::interval]
+                                                       ]
                                                     ),
                                    macds=[float(i['macd'])
                                            for i in result
                                           ][::-1
-                                            ][::interval
-                                              ],
+                                            ],
                                    macd_hists=[float(i['macd_hist'])
                                                for i in result
                                                ][::-1
-                                                 ][::interval
-                                                   ],
+                                                 ],
                                    signallines=[float(i['signal_line'])
                                                 for i in result
                                                 ][::-1
-                                                  ][::interval],
+                                                  ],
                                    bearbull=int(result[0]['macd_hist']))
         else:
             flash('No results found!', category='warning')
