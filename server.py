@@ -151,7 +151,7 @@ def graph():
                                                 for i in result
                                                 ][::-1
                                                   ],
-                                   bearbull=int(result[0]['macd_hist']))
+                                   bearbull=float(result[0]['macd_hist']))
         else:
             flash('No results found!', category='warning')
     return render_template('graph.html', name=session['username'])
