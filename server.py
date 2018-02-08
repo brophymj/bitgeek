@@ -107,21 +107,17 @@ def report():
 def datacenter():
     """Show the datacenter page."""
     if request.method == 'POST':
-        result =\
-            datacenter_report(int(request.form.get('interval')),
-                              request.form['to'],
-                              request.form['coin'],
-                              request.form['fast'],
-                              request.form['slow'],
-                              request.form['signal'],
-                              request.form['from'])
-        if result:
-            flash('Successfully generated a CSV file!', category='success')
-            return render_template('datacenter.html',
-                                   name=session['username'],
-                                   filenames=[tabulizer(f) for f in os.listdir('archive')])
-        else:
-            flash('No results found!', category='warning')
+        datacenter_report(int(request.form.get('interval')),
+                          request.form['to'],
+                          request.form['coin'],
+                          request.form['fast'],
+                          request.form['slow'],
+                          request.form['signal'],
+                          request.form['from'])
+        flash('Started generation of a CSV file...', category='warning')
+        return render_template('datacenter.html',
+                               name=session['username'],
+                               filenames=[tabulizer(f) for f in os.listdir('archive')])
     return render_template('datacenter.html', name=session['username'],
                            filenames=[tabulizer(f) for f in os.listdir('archive')])
 
