@@ -8,7 +8,7 @@ from flask import (Flask, current_app, flash, redirect, render_template,
 from flask_pymongo import PyMongo
 from modules.bittrex import fetch
 from modules.forms import LoginForm
-from modules.helpers import get_report, summarize, utcdate
+from modules.helpers import datacenter_report, get_report, summarize, utcdate
 from werkzeug.security import check_password_hash
 
 app = Flask(__name__)
@@ -102,6 +102,31 @@ def report():
     return render_template('report.html', name=session['username'])
 
 
+@app.route('/datacenter', methods=['GET', 'POST'])
+@login_required
+def datacenter():
+    """Show the datacenter page."""
+    if request.method == 'POST':
+        result =\
+            datacenter_report(int(request.form.get('interval')),
+                              request.form['to'],
+                              request.form['coin'],
+                              request.form['fast'],
+                              request.form['slow'],
+                              request.form['signal'],
+                              request.form['from'])
+        if result:
+            flash('Found {} results!'.format(
+                len(result[1])), category='success')
+            return render_template('datacenter.html',
+                                   name=session['username'],
+                                   download=result[0],
+                                   data=result[1][:100])
+        else:
+            flash('No results found!', category='warning')
+    return render_template('datacenter.html', name=session['username'])
+
+
 @app.route('/graph', methods=['GET', 'POST'])
 @login_required
 def graph():
@@ -158,4 +183,4 @@ def graph():
 
 
 if __name__ == '__main__':
-    app.run(debug=True)
+    app.run(debug=False)

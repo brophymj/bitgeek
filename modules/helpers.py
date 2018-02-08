@@ -1,9 +1,11 @@
 #!/usr/bin/python3
 """Helpers func for Bittrex Flask app."""
+import csv
 from datetime import datetime, timedelta
 from decimal import Decimal
 
 from bson.son import SON
+from modules.bittrex import coins_list, timing
 from pymongo import MongoClient
 
 connection = MongoClient()
@@ -40,69 +42,161 @@ def get_report():
     return report or False
 
 
-def summarize(interval, todate, coin, fast, slow, signal):
+def datacenter_report(interval, todate, coin, fast, slow, signal, fromdate):
+    """Generate report and CSV file for datacenter endpoint."""
+    if coin:
+        path = [timing(fromdate), timing(todate), coin, str(interval)]
+    else:
+        path = [timing(fromdate), timing(todate), 'ALL', str(interval)]
+    filepath = '-'.join(path).replace(':', '-')
+    with open('archive/{}.csv'.format(filepath), 'w') as dump:
+        fieldnames = ['pair', 'interval', 'datetime', 'date',
+                      'time', 'volume',
+                      'price', 'ema_fast', 'ema_slow', 'macd',
+                      'signal_line', 'macd_hist']
+        writer = csv.DictWriter(
+            dump, fieldnames=fieldnames, extrasaction='ignore')
+        writer.writeheader()
+        if coin:
+            [writer.writerow(i) for i in summarize(
+                interval, todate, coin, fast, slow, signal, fromdate)]
+        else:
+            for c in coins_list:
+                try:
+                    [writer.writerow(i) for i in summarize(
+                        interval, todate, c, fast, slow, signal, fromdate)]
+                except:
+                    pass
+    return filepath
+
+
+def summarize(interval, todate, coin, fast, slow, signal, fromdate=False):
     """Get the graph generated."""
-    limits = interval * 66
     coin = 'BTC-' + coin
-    pipeline =\
-        [{"$match":
-          {'TimeStamp':
-           {"$lt":
-            (datetime.strptime(todate,
-                               '%m/%d/%Y %I:%M %p'
-                               ) + timedelta(minutes=1)
-             ).strftime('%Y-%m-%dT%H:%M')},
-           'Pair': coin
-           }
-          },
-         {"$group":
-            {"_id":
-             {'datehours':
-              {"$arrayElemAt":
-               [
-                   {"$split":
-                    ["$TimeStamp",
-                     ':'
-                     ]
-                    }, 0]
-               },
-              'minutes':
-              {"$arrayElemAt":
-               [
-                   {"$split":
-                    ["$TimeStamp", ':']
-                    }, 1]
+    if not fromdate:
+        limits = interval * 66
+        pipeline =\
+            [{"$match":
+              {'TimeStamp':
+               {"$lt":
+                (datetime.strptime(todate,
+                                   '%m/%d/%Y %I:%M %p'
+                                   ) + timedelta(minutes=1)
+                 ).strftime('%Y-%m-%dT%H:%M')},
+               'Pair': coin
                }
               },
-             "sum_quantity":
-             {
-                 "$sum":
-                 "$Quantity"
-             },
-             "sum_total":
-             {
-                 "$sum":
-                 "$Total"
-             }
-             }
-          },
-         {"$project":
-          {"_id": 1,
-           "sum_quantity": 1,
-           "sum_total": 1,
-           "price":
-           {"$divide":
-            [
-                "$sum_total",
-                "$sum_quantity"
-            ]
-            }
-           }
-          },
-         {"$sort": SON([("_id", -1)])
-          },
-         {"$limit": limits}
-         ]
+             {"$group":
+                {"_id":
+                 {'datehours':
+                  {"$arrayElemAt":
+                   [
+                       {"$split":
+                        ["$TimeStamp",
+                         ':'
+                         ]
+                        }, 0]
+                   },
+                  'minutes':
+                  {"$arrayElemAt":
+                   [
+                       {"$split":
+                        ["$TimeStamp", ':']
+                        }, 1]
+                   }
+                  },
+                 "sum_quantity":
+                 {
+                     "$sum":
+                     "$Quantity"
+                 },
+                 "sum_total":
+                 {
+                     "$sum":
+                     "$Total"
+                 }
+                 }
+              },
+             {"$project":
+              {"_id": 1,
+               "sum_quantity": 1,
+               "sum_total": 1,
+               "price":
+               {"$divide":
+                [
+                    "$sum_total",
+                    "$sum_quantity"
+                ]
+                }
+               }
+              },
+             {"$sort": SON([("_id", -1)])
+              },
+             {"$limit": limits}
+             ]
+    else:
+        pipeline =\
+            [{"$match":
+              {'TimeStamp':
+               {"$lt":
+                (datetime.strptime(todate,
+                                   '%m/%d/%Y %I:%M %p'
+                                   ) + timedelta(minutes=1)
+                 ).strftime('%Y-%m-%dT%H:%M'),
+                "$gte":
+                datetime.strptime(fromdate,
+                                  '%m/%d/%Y %I:%M %p'
+                                  ).strftime('%Y-%m-%dT%H:%M')},
+               'Pair': coin
+               }
+              },
+             {"$group":
+                {"_id":
+                 {'datehours':
+                  {"$arrayElemAt":
+                   [
+                       {"$split":
+                        ["$TimeStamp",
+                         ':'
+                         ]
+                        }, 0]
+                   },
+                  'minutes':
+                  {"$arrayElemAt":
+                   [
+                       {"$split":
+                        ["$TimeStamp", ':']
+                        }, 1]
+                   }
+                  },
+                 "sum_quantity":
+                 {
+                     "$sum":
+                     "$Quantity"
+                 },
+                 "sum_total":
+                 {
+                     "$sum":
+                     "$Total"
+                 }
+                 }
+              },
+             {"$project":
+              {"_id": 1,
+               "sum_quantity": 1,
+               "sum_total": 1,
+               "price":
+               {"$divide":
+                [
+                    "$sum_total",
+                    "$sum_quantity"
+                ]
+                }
+               }
+              },
+             {"$sort": SON([("_id", -1)])
+              }
+             ]
     generator = list(collection.aggregate(pipeline))
     if generator:
         b = []
@@ -128,12 +222,19 @@ def summarize(interval, todate, coin, fast, slow, signal):
                               'price': price,
                               'sum_quantity': 0})
             b.append(i.copy())
-        generator = b[::-1][:interval * 67][::interval]
-        summarized = generator[:40]
-        ema_basic_slow = sum([Decimal(i['price']) for i in generator[41:]])\
-            / Decimal(len(generator[41:]))
-        ema_basic_fast = sum([Decimal(i['price']) for i in generator[41:53]])\
-            / Decimal(len(generator[41:53]))
+        summarized = None
+        if not fromdate:
+            generator = b[::-1][:interval * 67][::interval]
+            summarized = generator[:40]
+            ema_basic_slow =\
+                sum([Decimal(i['price']) for i in generator[41:]])\
+                / Decimal(len(generator[41:]))
+            ema_basic_fast =\
+                sum([Decimal(i['price']) for i in generator[41:53]])\
+                / Decimal(len(generator[41:53]))
+        else:
+            generator = b[::interval][::-1]
+            summarized = generator
         alphafast = Decimal(2.0 / (1.0 + float(fast)))
         alphaslow = Decimal(2.0 / (1.0 + float(slow)))
         alphasignal = Decimal(2.0 / (1.0 + float(signal)))
@@ -145,15 +246,20 @@ def summarize(interval, todate, coin, fast, slow, signal):
         first_generation = []
         for m in summarized:
             data = {}
+            data['pair'] = coin
+            data['interval'] = '{}-Minute'.format(interval)
             data['datetime'] = m['datetime']
+            data['date'] = m['datetime'].split('T')[0]
+            data['time'] = m['datetime'].split('T')[1]
             data['price'] = Decimal(m['price'])
             data['volume'] = Decimal(m['sum_quantity'])
             data['ema_fast'] = alphafast * Decimal(data['price'])
             data['ema_slow'] = alphaslow * Decimal(data['price'])
             first_generation.append(data.copy())
 
-        first_generation.append(
-            {'ema_fast': ema_basic_fast, 'ema_slow': ema_basic_slow})
+        if not fromdate:
+            first_generation.append(
+                {'ema_fast': ema_basic_fast, 'ema_slow': ema_basic_slow})
 
         second_generation = []
         for g in first_generation[::-1]:
@@ -167,7 +273,11 @@ def summarize(interval, todate, coin, fast, slow, signal):
             second_generation.append(data.copy())
 
         third_generation = []
-        for t in second_generation[1:]:
+        if not fromdate:
+            indexation = 1
+        else:
+            indexation = 0
+        for t in second_generation[indexation:]:
             data = t.copy()
             data['macd'] = data['ema_fast'] - data['ema_slow']
             data['signal_line'] = alphasignal * data['macd']

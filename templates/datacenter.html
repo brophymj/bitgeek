@@ -1,4 +1,4 @@
-{% extends "basic.html" %} {% block title %}Report Generator{% endblock %} {% block body %}
+{% extends "basic.html" %} {% block title %}Data Center{% endblock %} {% block body %}
 <div class="row">
     <div class="col-md-12">
         <nav class="navbar navbar-default navbar-inverse" role="navigation">
@@ -7,14 +7,14 @@
             </div>
             <div class="collapse navbar-collapse" id="bs-example-navbar-collapse-1">
                 <ul class="nav navbar-nav">
-                    <li class="active">
-                        <a href="#">Reports Generator</a>
+                    <li>
+                        <a href="/report">Reports Generator</a>
                     </li>
                     <li>
                         <a href="/graph">Graphs Generator</a>
                     </li>
-                    <li>
-                        <a href="/datacenter">Data Center</a>
+                    <li class="active">
+                        <a href="#">Data Center</a>
                     </li>
                 </ul>
                 <ul class="nav navbar-nav navbar-right">
@@ -47,13 +47,13 @@
     </div>
 </div>
 <div class="row">
-    <div class="col-md-3">
+    <div class="col-md-4">
     </div>
-    <div class="col-md-6">
-        <form class="form-inline" role="form" method="POST" data-toggle="validator">
+    <div class="col-md-4">
+        <form class="form" role="form" method="POST" data-toggle="validator">
             <div class="form-group has-feedback">
                 <div class='input-group date' id='datetimepicker6'>
-                    <input type='text' class="form-control" placeholder="Formatted start date" name="from" required pattern="^\d{2}\/\d{2}\/\d{4} \d{1,2}:\d{2} (AM|PM)$" maxlength="19" data-error="Please stick to the date format!" />
+                    <input type='text' class="form-control" placeholder="UTC start date" name="from" required pattern="^\d{2}\/\d{2}\/\d{4} \d{1,2}:\d{2} (AM|PM)$" maxlength="19" data-error="Please stick to the date format!" />
                     <span class="input-group-addon">
                                     <span class="glyphicon glyphicon-calendar"></span>
                     </span>
@@ -61,7 +61,7 @@
             </div>
             <div class="form-group has-feedback">
                 <div class='input-group date' id='datetimepicker7'>
-                    <input type='text' class="form-control" placeholder="Formatted end date" name="to" required pattern="^\d{2}\/\d{2}\/\d{4} \d{1,2}:\d{2} (AM|PM)$" maxlength="19" data-error="Please stick to the date format!" />
+                    <input type='text' class="form-control" placeholder="UTC end date" name="to" required pattern="^\d{2}\/\d{2}\/\d{4} \d{1,2}:\d{2} (AM|PM)$" maxlength="19" data-error="Please stick to the date format!" />
                     <span class="input-group-addon">
                                 <span class="glyphicon glyphicon-calendar"></span>
                     </span>
@@ -69,13 +69,51 @@
             </div>
             <div class="form-group has-feedback">
                 <div class='input-group' id='coin'>
-                    <input type='text' class="form-control" placeholder="Coin uppercased" name="coin" required pattern="^[A-Z]+$" data-error="Upper register letters only!" />
+                    <input type='text' class="form-control" placeholder="Coin uppercased (blank for all)" name="coin" pattern="^[A-Z]+$" data-error="Upper register letters only!" />
                     <span class="input-group-addon">
                                 <span class="glyphicon glyphicon-bitcoin"></span>
                     </span>
                 </div>
             </div>
-            <button type="submit" class="btn btn-primary btn-default">Submit</button>
+            <div class="form-group has-feedback">
+                <div class='input-group' id='fast'>
+                    <input type='text' class="form-control" placeholder="Fast param" name="fast" required pattern="^\d+$" data-error="Numbers only!" value="12" />
+                    <span class="input-group-addon">
+                                Fast
+                    </span>
+                </div>
+            </div>
+            <div class="form-group has-feedback">
+                <div class='input-group' id='slow'>
+                    <input type='text' class="form-control" placeholder="Slow param" name="slow" required pattern="^\d+$" data-error="Numbers only!" value="26" />
+                    <span class="input-group-addon">
+                                Slow
+                    </span>
+                </div>
+            </div>
+            <div class="form-group has-feedback">
+                <div class='input-group' id='signal'>
+                    <input type='text' class="form-control" placeholder="Signal param" name="signal" required pattern="^\d+$" data-error="Numbers only!" value="9" />
+                    <span class="input-group-addon">
+                                Signal
+                    </span>
+                </div>
+            </div>
+            <div class="form-group has-feedback">
+                <div class='input-group' id='interval'>
+                    <select class="form-control" id="selector" name='interval'>
+                        <option value='1'>1 minute</option>
+                        <option value='5'>5 minutes</option>
+                        <option value='10'>10 minutes</option>
+                        <option value='30'>30 minutes</option>
+                        <option value='60'>60 minutes</option>
+                    </select>
+                    <span class="input-group-addon">
+                                Interval
+                    </span>
+                </div>
+            </div>
+            <button type="submit" class="btn btn-primary btn-default btn-block">Submit</button>
         </form>
         <script type="text/javascript">
             $(function() {
@@ -92,7 +130,7 @@
             });
         </script>
     </div>
-    <div class="col-md-3">
+    <div class="col-md-4">
     </div>
 </div>
 {% if download %}
@@ -109,70 +147,6 @@
 <div class="row">
     <div class="col-md-12">
         <hr />
-    </div>
-</div>
-<div class="row">
-    <div class="col-md-12">
-        <table class="table table-hover table-bordered">
-            <thead>
-                <tr>
-                    <th>
-                        Id
-                    </th>
-                    <th>
-                        Pair
-                    </th>
-                    <th>
-                        Quantity
-                    </th>
-                    <th>
-                        Price
-                    </th>
-                    <th>
-                        Total
-                    </th>
-                    <th>
-                        FillType
-                    </th>
-                    <th>
-                        OrderType
-                    </th>
-                    <th>
-                        TimeStamp
-                    </th>
-                </tr>
-            </thead>
-            {% for d in data %}
-            <tbody>
-                <tr>
-                    <td>
-                        {{ d.Id }}
-                    </td>
-                    <td>
-                        {{ d.Pair }}
-                    </td>
-                    <td>
-                        {{ d.Quantity }}
-                    </td>
-                    <td>
-                        {{ d.Price }}
-                    </td>
-                    <td>
-                        {{ d.Total }}
-                    </td>
-                    <td>
-                        {{ d.FillType }}
-                    </td>
-                    <td>
-                        {{ d.OrderType }}
-                    </td>
-                    <td>
-                        {{ d.TimeStamp }}
-                    </td>
-                </tr>
-            </tbody>
-            {% endfor %}
-        </table>
     </div>
 </div>
 {% endif %} {% endblock %}
