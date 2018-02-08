@@ -3,6 +3,7 @@
 import csv
 from datetime import datetime, timedelta
 from decimal import Decimal
+import re
 
 from bson.son import SON
 from modules.bittrex import coins_list, timing
@@ -11,6 +12,20 @@ from pymongo import MongoClient
 connection = MongoClient()
 db = connection.bittrex
 collection = db.market
+
+
+def tabulizer(filename):
+    """Converts filename into dictionary."""
+    data = {}
+    try:
+        data['from'] = re.findall('^\d{4}-\d{2}-\d{2}T\d{2}-\d{2}', filename)[0]
+        data['to'] = re.findall('-(\d{4}-\d{2}-\d{2}T\d{2}-\d{2})', filename)[0]
+        data['coin'] = re.findall('(\w{3,})-\d+\.csv', filename)[0]
+        data['interval'] = re.findall('(\d+)\.csv$', filename)[0]
+        data['filename'] = filename
+        return data
+    except:
+        pass
 
 
 def utcdate():

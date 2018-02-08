@@ -129,24 +129,51 @@
                 });
             });
         </script>
+        {% if filenames %}
+        <table class="table">
+				<thead>
+					<tr>
+						<th>
+							From
+						</th>
+						<th>
+							To
+						</th>
+                                                <th>
+                                                        Coin
+                                                </th>
+                                                <th>
+                                                        Interval
+                                                </th>
+                                                <th>
+                                                        URL
+                                                </th>
+					</tr>
+				</thead>
+				<tbody>
+                    {% for f in filenames %}
+					<tr>
+						<td>
+							{{ f.from }}
+						</td>
+                                                <td>
+                                                        {{ f.to }}
+                                                </td>
+<td>
+                                                        {{ f.coin }}
+                                                </td>
+<td>
+                                                        {{ f.interval }}
+                                                </td>
+						<td>
+							<a target="_blank" class="btn btn-success btn-block btn-default" role="button" href='/uploads/{{ f.filename }}'>Download CSV!</a>
+						</td>
+                    {% endfor %}
+				</tbody>
+			</table>
+        {% endif %}
     </div>
     <div class="col-md-4">
     </div>
 </div>
-{% if download %}
-<div class="row">
-    <div class="col-md-12">
-        <hr />
-    </div>
-</div>
-<div class="row">
-    <div class="col-md-12">
-        <a target="_blank" class="btn btn-success btn-block btn-default" role="button" href='/uploads/{{ download }}.csv'>Download CSV!</a>
-    </div>
-</div>
-<div class="row">
-    <div class="col-md-12">
-        <hr />
-    </div>
-</div>
-{% endif %} {% endblock %}
+{% endblock %}

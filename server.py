@@ -8,7 +8,7 @@ from flask import (Flask, current_app, flash, redirect, render_template,
 from flask_pymongo import PyMongo
 from modules.bittrex import fetch
 from modules.forms import LoginForm
-from modules.helpers import datacenter_report, get_report, summarize, utcdate
+from modules.helpers import datacenter_report, get_report, summarize, utcdate, tabulizer
 from werkzeug.security import check_password_hash
 
 app = Flask(__name__)
@@ -116,15 +116,14 @@ def datacenter():
                               request.form['signal'],
                               request.form['from'])
         if result:
-            flash('Found {} results!'.format(
-                len(result[1])), category='success')
+            flash('Successfully generated a CSV file!', category='success')
             return render_template('datacenter.html',
                                    name=session['username'],
-                                   download=result[0],
-                                   data=result[1][:100])
+                                   filenames=[tabulizer(f) for f in os.listdir('archive')])
         else:
             flash('No results found!', category='warning')
-    return render_template('datacenter.html', name=session['username'])
+    return render_template('datacenter.html', name=session['username'],
+                           filenames=[tabulizer(f) for f in os.listdir('archive')])
 
 
 @app.route('/graph', methods=['GET', 'POST'])
