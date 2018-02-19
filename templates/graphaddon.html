@@ -1,4 +1,4 @@
-{% extends "basic.html" %} {% block title %}Graph Generator{% endblock %} {% block head %}
+{% extends "basic.html" %} {% block title %}Graphs Addon Generator{% endblock %} {% block head %}
 <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/2.7.1/Chart.min.js"></script>{% endblock %} {% block body %}
 <div class="row">
     <div class="col-md-12">
@@ -11,11 +11,11 @@
                     <li>
                         <a href="/report">Reports Generator</a>
                     </li>
-                    <li class="active">
-                        <a href="#">Graphs Generator</a>
-                    </li>
                     <li>
-                        <a href="/graphaddon">Graphs Addon Generator</a>
+                        <a href="/graph">Graphs Generator</a>
+                    </li>
+                    <li class="active">
+                        <a href="#">Graphs Addon Generator</a>
                     </li>
                     <li>
                         <a href="/datacenter">Data Center</a>
@@ -56,7 +56,14 @@
     <div class="col-md-4">
         <form class="form" role="form" method="POST" data-toggle="validator">
             <div class="form-group has-feedback">
-                <label for='datetime'>UTC 'to' datetime (leave blank for current):</label>
+                <div class='input-group date' id='datetimepicker_from'>
+                    <input type='text' class="form-control" placeholder="Formatted start date" name="from" required pattern="^\d{2}\/\d{2}\/\d{4} \d{1,2}:\d{2} (AM|PM)$" maxlength="19" data-error="Please stick to the date format!" value='{{ fromvalue }}'/>
+                    <span class="input-group-addon">
+                                    <span class="glyphicon glyphicon-calendar"></span>
+                    </span>
+                </div>
+            </div>
+            <div class="form-group has-feedback">
                 <div class='input-group date' id='datetimepicker_to'>
                     <input type='text' class="form-control" name='to'placeholder="Formatted end date" pattern="^\d{2}\/\d{2}\/\d{4} \d{1,2}:\d{2} (AM|PM)$" maxlength="19" data-error="Please stick to the date format!" id='datetime' value='{{ tovalue }}'/>
                     <span class="input-group-addon">
@@ -70,30 +77,6 @@
                     <input type='text' class="form-control" placeholder="Coin uppercased" name="coin" required pattern="^[A-Z]+$" data-error="Upper register letters only!" value='{{ coinvalue }}' />
                     <span class="input-group-addon">
                                 <span class="glyphicon glyphicon-bitcoin"></span>
-                    </span>
-                </div>
-            </div>
-            <div class="form-group has-feedback">
-                <div class='input-group' id='fast'>
-                    <input type='text' class="form-control" placeholder="Fast param" name="fast" required pattern="^\d+$" data-error="Numbers only!" value="12" />
-                    <span class="input-group-addon">
-                                Fast
-                    </span>
-                </div>
-            </div>
-            <div class="form-group has-feedback">
-                <div class='input-group' id='slow'>
-                    <input type='text' class="form-control" placeholder="Slow param" name="slow" required pattern="^\d+$" data-error="Numbers only!" value="26" />
-                    <span class="input-group-addon">
-                                Slow
-                    </span>
-                </div>
-            </div>
-            <div class="form-group has-feedback">
-                <div class='input-group' id='signal'>
-                    <input type='text' class="form-control" placeholder="Signal param" name="signal" required pattern="^\d+$" data-error="Numbers only!" value="9" />
-                    <span class="input-group-addon">
-                                Signal
                     </span>
                 </div>
             </div>
@@ -114,8 +97,16 @@
             <button type="submit" class="btn btn-primary btn-default btn-block">Submit</button>
         </form>
         <script type="text/javascript">
-        $(function () {
+        $(function() {
+            $('#datetimepicker_from').datetimepicker();
             $('#datetimepicker_to').datetimepicker({
+                useCurrent: false
+            });
+            $("#datetimepicker_from").on("dp.change", function(e) {
+                $('#datetimepicker_to').data("DateTimePicker").minDate(e.date);
+            });
+            $("#datetimepicker_to").on("dp.change", function(e) {
+                $('#datetimepicker_from').data("DateTimePicker").maxDate(e.date);
             });
         });
         </script>
@@ -131,21 +122,13 @@
     </div>
 </div>
 <div class="row">
-    <div class="col-md-4">
-    </div>
-    <div class="col-md-4 text-center">
-        <h3>MACD Indicator: {% if bearbull >= 0 %}<p class='text-success'>BULLISH</p>{% else %}<p class='text-danger'>BEARISH</p>{% endif %}</h3>
-    </div>
-    <div class="col-md-4">
-    </div>
-</div>
-<div class="row">
+    <div class="col-md-12">
     <div class="col-md-6">
         <canvas id="line"></canvas>
         <script>
-            var prices = {{ prices }};
-            var fast = {{ fastes }};
-            var slow = {{ slowes }};
+            var rsi = {{ rsi }};
+            var overb = {{ overb }};
+            var overs = {{ overs }};
             var minutes = "{{ minutes }}";
             var ctx = document.getElementById('line').getContext('2d');
             var chart = new Chart(ctx, {
@@ -156,24 +139,26 @@
                 data: {
                     labels: minutes.split('*'),
                     datasets: [{
-                            label: "Price",
-                            backgroundColor: 'rgb(0,191,255)',
-                            borderColor: 'rgb(0,191,255)',
-                            data: prices,
+                            label: "RSI",
+                            backgroundColor: 'rgb(244,104,66)',
+                            borderColor: 'rgb(244,104,66)',
+                            data: rsi,
                             fill: false
                         },
                         {
-                            label: "EMA Fast",
-                            backgroundColor: 'rgb(0,255,0)',
-                            borderColor: 'rgb(0,255,0)',
-                            data: fast,
+                            label: "Overbought",
+                            backgroundColor: 'rgb(244,152,66)',
+                            borderColor: 'rgb(244,152,66)',
+                            borderDash: [5,5],
+                            data: overb,
                             fill: false
                         },
                         {
-                            label: "EMA Slow",
-                            backgroundColor: 'rgb(220,20,60)',
-                            borderColor: 'rgb(220,20,60)',
-                            data: slow,
+                            label: "Oversold",
+                            backgroundColor: 'rgb(66,244,197)',
+                            borderColor: 'rgb(66,244,197)',
+                            borderDash: [5,5],
+                            data: overs,
                             fill: false
                         }
                     ],
@@ -185,51 +170,97 @@
         </script>
     </div>
     <div class="col-md-6">
-        <canvas id="bar"></canvas>
+        <canvas id="line_2"></canvas>
         <script>
-            var macds = {{ macds }};
-            var macdhists = {{ macd_hists }};
-            var signallines = {{ signallines }};
-            var minutes = "{{ minutes }}";
-            var ctx = document.getElementById('bar').getContext('2d');
-            var chart = new Chart(ctx, {
-                // The type of chart we want to create
-                type: 'bar',
+        var obv = {{ obv }};
+        var minutes = "{{ minutes }}";
+        var ctx = document.getElementById('line_2').getContext('2d');
+        var chart = new Chart(ctx, {
+            // The type of chart we want to create
+            type: 'line',
 
-                // The data for our dataset
-                data: {
-                    labels: minutes.split('*'),
-                    datasets: [{
-                        label: "MACD",
-                        backgroundColor: 'rgb(0,0,128)',
-                        borderColor: 'rgb(0,0,128)',
-                        data: macds,
-                        fill: false,
-                        type: 'line'
+            // The data for our dataset
+            data: {
+                labels: minutes.split('*'),
+                datasets: [{
+                        label: "OBV",
+                        backgroundColor: 'rgb(244,131,66)',
+                        borderColor: 'rgb(244,131,66)',
+                        data: obv,
+                        fill: false
+                    }
+                ],
+            },
 
-                    },
-                    {
-                        label: "Signal Lines",
-                        backgroundColor: 'rgb(220,20,60)',
-                        borderColor: 'rgb(220,20,60)',
-                        data: signallines,
-                        fill: false,
-                        type: 'line'
-                    },
-                        {
-                            label: "MACD-Histogram",
-                            backgroundColor: 'rgb(119,136,153)',
-                            borderColor: 'rgb(119,136,153)',
-                            data: macdhists
-                        }
-
-                    ],
-                },
-
-                // Configuration options go here
-                options: {}
-            });
+            // Configuration options go here
+            options: {}
+        });
         </script>
     </div>
+</div>
+</div>
+<div class="row">
+    <div class="col-md-12">
+        <div class="col-md-3">
+        </div>
+    <div class="col-md-6">
+        <canvas id="line_3"></canvas>
+        <script>
+        var aru = {{ aru }};
+        var overb = {{ overb }};
+        var overs = {{ overs }};
+        var ard = {{ ard }};
+        var minutes = "{{ minutes }}";
+        var ctx = document.getElementById('line_3').getContext('2d');
+        var chart = new Chart(ctx, {
+            // The type of chart we want to create
+            type: 'line',
+
+            // The data for our dataset
+            data: {
+                labels: minutes.split('*'),
+                datasets: [{
+                        label: "Aroonup",
+                        backgroundColor: 'rgb(66,244,98)',
+                        borderColor: 'rgb(66,244,98)',
+                        data: aru,
+                        fill: false
+                    },
+                    {
+                        label: "Overbought",
+                        backgroundColor: 'rgb(244,152,66)',
+                        borderColor: 'rgb(244,152,66)',
+                        borderDash: [5,5],
+                        data: overb,
+                        fill: false
+                        },
+                    {
+                        label: "Oversold",
+                        backgroundColor: 'rgb(0,191,255)',
+                        borderColor: 'rgb(0,191,255)',
+                        borderDash: [5,5],
+                        data: overs,
+                        fill: false
+                        },
+                    {
+                        label: "Aroondown",
+                        backgroundColor: 'rgb(66,209,244)',
+                        borderColor: 'rgb(66,209,244)',
+                        data: ard,
+                        fill: false
+                        },
+
+
+                ],
+            },
+
+            // Configuration options go here
+            options: {}
+        });
+        </script>
+    </div>
+    <div class="col-md-3">
+    </div>
+</div>
 </div>
 {% endif %} {% endblock %}

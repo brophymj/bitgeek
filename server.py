@@ -8,7 +8,8 @@ from flask import (Flask, current_app, flash, redirect, render_template,
 from flask_pymongo import PyMongo
 from modules.bittrex import fetch
 from modules.forms import LoginForm
-from modules.helpers import datacenter_report, get_report, summarize, utcdate, tabulizer
+from modules.helpers import (datacenter_report, get_report, summarize,
+                             tabulizer, three_graphs, utcdate)
 from werkzeug.security import check_password_hash
 
 app = Flask(__name__)
@@ -102,6 +103,57 @@ def report():
     return render_template('report.html', name=session['username'])
 
 
+@app.route('/graphaddon', methods=['GET', 'POST'])
+@login_required
+def graphaddon():
+    """Show the additional graphs page."""
+    if request.method == 'POST':
+        result = three_graphs(int(request.form.get('interval')),
+                              request.form['to'],
+                              request.form['coin'],
+                              request.form['from'])
+        if result:
+            flash('Found {} results!'.format(
+                len(result)), category='success')
+            return render_template('graphaddon.html',
+                                   name=session['username'],
+                                   data=result,
+                                   tovalue=request.form['to'],
+                                   fromvalue=request.form['from'],
+                                   coinvalue=request.form['coin'],
+                                   minutes='*'.join([i['datetime']
+                                                     for i in result
+                                                     ]
+                                                    ),
+                                   rsi=[float(i['rsi'])
+                                           for i in
+                                           result
+                                        ],
+                                   overb=[float(70)
+                                          for i in
+                                          result
+                                          ],
+                                   overs=[float(30)
+                                          for i in
+                                          result
+                                          ],
+                                   obv=[float(i['obv'])
+                                        for i in
+                                        result
+                                        ],
+                                   aru=[float(i['aroonup'])
+                                        for i in
+                                        result
+                                        ],
+                                   ard=[float(i['aroondown'])
+                                        for i in
+                                        result
+                                        ])
+        else:
+            flash('No results found!', category='warning')
+    return render_template('graphaddon.html', name=session['username'])
+
+
 @app.route('/datacenter', methods=['GET', 'POST'])
 @login_required
 def datacenter():
@@ -117,9 +169,11 @@ def datacenter():
         flash('Started generation of a CSV file...', category='warning')
         return render_template('datacenter.html',
                                name=session['username'],
-                               filenames=[tabulizer(f) for f in os.listdir('archive')])
+                               filenames=[tabulizer(f) for f in
+                                          os.listdir('archive')])
     return render_template('datacenter.html', name=session['username'],
-                           filenames=[tabulizer(f) for f in os.listdir('archive')])
+                           filenames=[tabulizer(f) for f in
+                                      os.listdir('archive')])
 
 
 @app.route('/graph', methods=['GET', 'POST'])
